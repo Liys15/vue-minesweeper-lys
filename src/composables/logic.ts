@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import type { BlockState } from '~/types'
-import { isDevMode, toggleDev } from '~/composables'
 
 const direction = [
   [0, 1], //上
@@ -13,7 +12,7 @@ const direction = [
   [-1, 1] //左上
 ]
 
-enum GameDifficulty {
+export enum GameDifficulty {
   Easy = 'Easy',
   Medium = 'Medium',
   Hard = 'Hard',
@@ -29,7 +28,7 @@ export class GamePlay {
   flags
   remainingMines
 
-  constructor(level: GameDifficulty) {
+  constructor(level: GameDifficulty = GameDifficulty.Medium) {
     this.gameDifficulty = ref(level);
     this.mineGenerated = false
     this.width = computed(() => {
@@ -64,13 +63,14 @@ export class GamePlay {
     })
     this.flags = ref<number>(0)
     this.remainingMines = computed(() =>
-      Math.min(0, this.totalMines.value - this.flags.value)
+      Math.max(0, this.totalMines.value - this.flags.value)
     )
     this.reset()
   }
 
   reset() {
     this.mineGenerated = false
+    this.flags.value = 0
     this.state.value = Array.from({ length: this.height.value }, (_, row) =>
       Array.from({ length: this.width.value }, (_, col): BlockState => ({
         x: col,
