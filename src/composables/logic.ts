@@ -95,16 +95,17 @@ export class GamePlay {
       this.state.value.mineGenerated = true
       this.state.value.startTime = timestamp.value
     }
-    block.revealed = true
+    if (!block.revealed) {
+      block.revealed = true
+      this.checkGameState()
+      if (!block.adjacentMines)
+        this.expandZeroBlocks(block)
+    }
     if (block.mine) {
       this.state.value.gameState = 'lost'
       this.showAllMines()
       this.state.value.endTime = timestamp.value
-      return
     }
-    if (!block.adjacentMines)
-      this.expandZeroBlocks(block)
-    this.checkGameState()
   }
 
   showAllMines() {
@@ -202,5 +203,21 @@ export class GamePlay {
       return Math.floor((timestamp.value - this.state.value.startTime) / 1000)
     else
       return Math.floor((this.state.value.endTime - this.state.value.startTime) / 1000)
+  }
+
+  expandSilbings(block: BlockState) {
+    this.getSiblings(block).forEach((b) => {
+      if (!b.revealed && !b.flagged) {
+        b.revealed = true
+        if (b.mine) {
+          this.state.value.gameState = 'lost'
+          this.showAllMines()
+          this.state.value.endTime = timestamp.value
+        }
+        else {
+          this.checkGameState()
+        }
+      }
+    })
   }
 }

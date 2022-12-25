@@ -81,6 +81,7 @@ watch(isDevMode, (newValue) => {
           v-for="block, x in row" :key="x"
           :block="block"
           @click="play.onClick(block)"
+          @dblclick="play.expandSilbings(block)"
           @contextmenu.prevent="play.onRightClick(block)"
         />
       </div>
