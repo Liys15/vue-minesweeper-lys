@@ -7,20 +7,6 @@ import { GamePlay, isDevMode, toggleDev } from '~/composables'
 
 const play = new GamePlay()
 
-function newGame(difficulty: 'Easy' | 'Medium' | 'Hard') {
-  switch (difficulty) {
-    case 'Easy':
-      play.reset(8, 8, 10)
-      break
-    case 'Medium':
-      play.reset(16, 16, 40)
-      break
-    case 'Hard':
-      play.reset(30, 16, 99)
-      break
-  }
-}
-
 useStorage('vue-minesweeper-gamestate', play.state)
 
 const revealedBlocks: boolean[] = Array.from([]) // 记录作弊前点开的block
@@ -43,13 +29,13 @@ watch(isDevMode, (newValue) => {
 <template>
   <div class="minesweeper" flex="~ col" items-center>
     <div class="menu" flex="~" justify-center gap-2 pt-2>
-      <button btn @click="newGame('Easy')">
+      <button btn @click="play.reset('Easy')">
         Easy
       </button>
-      <button btn @click="newGame('Medium')">
+      <button btn @click="play.reset('Medium')">
         Medium
       </button>
-      <button btn @click="newGame('Hard')">
+      <button btn @click="play.reset('Hard')">
         Hard
       </button>
       <button

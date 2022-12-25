@@ -40,6 +40,33 @@ export class GamePlay {
       startTime: timestamp.value,
       endTime: timestamp.value,
     }
+
+    this.remainingMines = computed(() =>
+      Math.max(0, this.totalMines - this.state.value.flags),
+    )
+    this.reset()
+  }
+
+  reset(state: 'Easy' | 'Medium' | 'Hard' = 'Medium') {
+    this.state.value.gameDifficulty = state
+    this.setBoardConfig()
+    this.state.value.gameState = 'play'
+    this.state.value.mineGenerated = false
+    this.state.value.flags = 0
+    this.state.value.board = Array.from({ length: this.height }, (_, row) =>
+      Array.from({ length: this.width }, (_, col): BlockState => ({
+        x: col,
+        y: row,
+        revealed: false,
+        mine: false,
+        flagged: false,
+        adjacentMines: 0,
+      })),
+    )
+    this.state.value.startTime = timestamp.value
+  }
+
+  setBoardConfig() {
     switch (this.state.value.gameDifficulty) {
       case 'Easy':
         this.width = 8
@@ -57,34 +84,6 @@ export class GamePlay {
         this.totalMines = 99
         break
     }
-    this.remainingMines = computed(() =>
-      Math.max(0, this.totalMines - this.state.value.flags),
-    )
-    this.reset()
-  }
-
-  reset(
-    width = this.width,
-    height = this.height,
-    totalMines = this.totalMines,
-  ) {
-    this.width = width
-    this.height = height
-    this.totalMines = totalMines
-    this.state.value.gameState = 'play'
-    this.state.value.mineGenerated = false
-    this.state.value.flags = 0
-    this.state.value.board = Array.from({ length: this.height }, (_, row) =>
-      Array.from({ length: this.width }, (_, col): BlockState => ({
-        x: col,
-        y: row,
-        revealed: false,
-        mine: false,
-        flagged: false,
-        adjacentMines: 0,
-      })),
-    )
-    this.state.value.startTime = timestamp.value
   }
 
   onClick(block: BlockState) {
@@ -101,11 +100,8 @@ export class GamePlay {
       if (!block.adjacentMines)
         this.expandZeroBlocks(block)
     }
-    if (block.mine) {
-      this.state.value.gameState = 'lost'
-      this.showAllMines()
-      this.state.value.endTime = timestamp.value
-    }
+    if (block.mine)
+      this.onGameOver('lost')
   }
 
   showAllMines() {
@@ -119,10 +115,8 @@ export class GamePlay {
     const blocks = this.state.value.board.flat()
     if (blocks.every(value =>
       value.mine ? true : (!!value.revealed),
-    )) {
-      this.state.value.gameState = 'won'
-      this.state.value.endTime = timestamp.value
-    }
+    ))
+      this.onGameOver('won')
   }
 
   expandZeroBlocks(centerblock: BlockState) {
@@ -199,25 +193,32 @@ export class GamePlay {
   getTime() {
     if (!this.state.value.mineGenerated)
       return 0
-    if (this.state.value.gameState === 'play')
-      return Math.floor((timestamp.value - this.state.value.startTime) / 1000)
-    else
-      return Math.floor((this.state.value.endTime - this.state.value.startTime) / 1000)
+    return Math.floor(((
+      this.state.value.gameState === 'play'
+        ? timestamp.value
+        : this.state.value.endTime)
+      - this.state.value.startTime
+    ) / 1000)
   }
 
   expandSilbings(block: BlockState) {
+    if (this.state.value.gameState !== 'play')
+      return
     this.getSiblings(block).forEach((b) => {
       if (!b.revealed && !b.flagged) {
         b.revealed = true
-        if (b.mine) {
-          this.state.value.gameState = 'lost'
-          this.showAllMines()
-          this.state.value.endTime = timestamp.value
-        }
-        else {
+        if (b.mine)
+          this.onGameOver('lost')
+        else
           this.checkGameState()
-        }
       }
     })
+  }
+
+  onGameOver(state: 'play' | 'won' | 'lost') {
+    this.state.value.gameState = state
+    if (state === 'lost')
+      this.showAllMines()
+    this.state.value.endTime = timestamp.value
   }
 }
