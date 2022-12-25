@@ -2,6 +2,7 @@
 import { watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import MineBlock from './MineBlock.vue'
+import Confetti from './Confetti.vue'
 import { GameDifficulty, GamePlay, isDevMode, toggleDev } from '~/composables'
 
 const play = new GamePlay()
@@ -69,4 +70,5 @@ watch(isDevMode, (newValue) => {
       </div>
     </div>
   </div>
+  <Confetti :passed="play.state.value.gameState === 'won'" />
 </template>
