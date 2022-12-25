@@ -47,7 +47,10 @@ watch(isDevMode, (newValue) => {
         {{ isDevMode ? 'Hide' : 'Show' }}
       </button>
     </div>
-    <div class="gameboard" m-4 pt-2>
+    <div
+      class="gameboard" m-4 pt-2
+      :class="play.state.value.gameState === 'lost' ? 'hvr-buzz-out' : ''"
+    >
       <div flex="~" justify-between text-xl pb-2>
         <div class="time" flex-inline items-center>
           <div i-mdi-timer />

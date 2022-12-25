@@ -25,9 +25,9 @@ interface GameState {
 
 export class GamePlay {
   state = ref<GameState>({} as GameState)
-  width
-  height
-  totalMines
+  width = 0
+  height = 0
+  totalMines = 0
   remainingMines
 
   constructor(defaultGame: 'Easy' | 'Medium' | 'Hard' = 'Medium') {
@@ -40,7 +40,6 @@ export class GamePlay {
       startTime: timestamp.value,
       endTime: timestamp.value,
     }
-
     this.remainingMines = computed(() =>
       Math.max(0, this.totalMines - this.state.value.flags),
     )
