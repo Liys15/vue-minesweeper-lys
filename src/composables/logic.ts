@@ -13,14 +13,8 @@ const direction = [
   [-1, 1], // 左上
 ]
 
-export enum GameDifficulty {
-  Easy = 'Easy',
-  Medium = 'Medium',
-  Hard = 'Hard',
-}
-
 interface GameState {
-  gameDifficulty: GameDifficulty
+  gameDifficulty: 'Easy' | 'Medium' | 'Hard'
   gameState: 'play' | 'won' | 'lost'
   mineGenerated: Boolean
   board: BlockState[][]
@@ -36,7 +30,7 @@ export class GamePlay {
   totalMines
   remainingMines
 
-  constructor(defaultGame: GameDifficulty = GameDifficulty.Medium) {
+  constructor(defaultGame: 'Easy' | 'Medium' | 'Hard' = 'Medium') {
     this.state.value = {
       gameDifficulty: defaultGame,
       gameState: 'play',
@@ -46,28 +40,42 @@ export class GamePlay {
       startTime: timestamp.value,
       endTime: timestamp.value,
     }
-    this.width = computed(() =>
-      this.state.value.gameDifficulty === 'Easy' ? 8 : (this.state.value.gameDifficulty === 'Medium' ? 16 : 30),
-    )
-    this.height = computed(() =>
-      this.state.value.gameDifficulty === 'Easy' ? 8 : (this.state.value.gameDifficulty === 'Medium' ? 16 : 16),
-    )
-    this.totalMines = computed(() =>
-      this.state.value.gameDifficulty === 'Easy' ? 10 : (this.state.value.gameDifficulty === 'Medium' ? 40 : 99),
-    )
-    this.state.value.flags = 0
+    switch (this.state.value.gameDifficulty) {
+      case 'Easy':
+        this.width = 8
+        this.height = 8
+        this.totalMines = 10
+        break
+      case 'Medium':
+        this.width = 16
+        this.height = 16
+        this.totalMines = 40
+        break
+      case 'Hard':
+        this.width = 30
+        this.height = 16
+        this.totalMines = 99
+        break
+    }
     this.remainingMines = computed(() =>
-      Math.max(0, this.totalMines.value - this.state.value.flags),
+      Math.max(0, this.totalMines - this.state.value.flags),
     )
     this.reset()
   }
 
-  reset() {
+  reset(
+    width = this.width,
+    height = this.height,
+    totalMines = this.totalMines,
+  ) {
+    this.width = width
+    this.height = height
+    this.totalMines = totalMines
     this.state.value.gameState = 'play'
     this.state.value.mineGenerated = false
     this.state.value.flags = 0
-    this.state.value.board = Array.from({ length: this.height.value }, (_, row) =>
-      Array.from({ length: this.width.value }, (_, col): BlockState => ({
+    this.state.value.board = Array.from({ length: this.height }, (_, row) =>
+      Array.from({ length: this.width }, (_, col): BlockState => ({
         x: col,
         y: row,
         revealed: false,
@@ -96,7 +104,6 @@ export class GamePlay {
     }
     if (!block.adjacentMines)
       this.expandZeroBlocks(block)
-
     this.checkGameState()
   }
 
@@ -137,7 +144,7 @@ export class GamePlay {
     return direction.map(([dx, dy]) => {
       const x1: number = x0 + dx
       const y1: number = y0 + dy
-      if (x1 < 0 || x1 >= this.width.value || y1 < 0 || y1 >= this.height.value)
+      if (x1 < 0 || x1 >= this.width || y1 < 0 || y1 >= this.height)
         return undefined
       return this.state.value.board[y1][x1]
     }).filter(Boolean) as BlockState[]
@@ -154,21 +161,21 @@ export class GamePlay {
 
   generateMines(initBlock: BlockState) {
     // 生成炸弹，避开initBlock及周围8格的位置
-    const maxNum = this.width.value * this.height.value
-    if (this.totalMines.value >= maxNum)
+    const maxNum = this.width * this.height
+    if (this.totalMines >= maxNum)
       throw new Error(`Can't generate more than ${maxNum} mines`)
     const x0 = initBlock.x
     const y0 = initBlock.y
-    const initPos = y0 * this.width.value + x0
+    const initPos = y0 * this.width + x0
     const mineList: number[] = [initPos,
-      ...this.getSiblings(initBlock).map(s => s.y * this.width.value + s.x)]
+      ...this.getSiblings(initBlock).map(s => s.y * this.width + s.x)]
     const initLength = mineList.length
-    while (mineList.length < this.totalMines.value + initLength) {
+    while (mineList.length < this.totalMines + initLength) {
       const rdmNo = Math.floor((Math.random() * (maxNum)))
       if (mineList.includes(rdmNo))
         continue
-      const posX = Math.floor(rdmNo % this.width.value)
-      const posY = Math.floor(rdmNo / this.width.value)
+      const posX = Math.floor(rdmNo % this.width)
+      const posY = Math.floor(rdmNo / this.width)
       mineList.push(rdmNo)
       this.state.value.board[posY][posX].mine = true
     }
@@ -186,11 +193,6 @@ export class GamePlay {
         })
       })
     })
-  }
-
-  onChangeGameDifficulty(value: GameDifficulty) {
-    this.state.value.gameDifficulty = value
-    this.reset()
   }
 
   getTime() {

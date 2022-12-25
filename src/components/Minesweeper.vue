@@ -3,9 +3,23 @@ import { watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import MineBlock from './MineBlock.vue'
 import Confetti from './Confetti.vue'
-import { GameDifficulty, GamePlay, isDevMode, toggleDev } from '~/composables'
+import { GamePlay, isDevMode, toggleDev } from '~/composables'
 
 const play = new GamePlay()
+
+function newGame(difficulty: 'Easy' | 'Medium' | 'Hard') {
+  switch (difficulty) {
+    case 'Easy':
+      play.reset(8, 8, 10)
+      break
+    case 'Medium':
+      play.reset(16, 16, 40)
+      break
+    case 'Hard':
+      play.reset(30, 16, 99)
+      break
+  }
+}
 
 useStorage('vue-minesweeper-gamestate', play.state)
 
@@ -14,13 +28,13 @@ const revealedBlocks: boolean[] = Array.from([]) // 记录作弊前点开的bloc
 watch(isDevMode, (newValue) => {
   if (newValue) {
     play.state.value.board.forEach((row, y) => row.forEach((ele, x) => {
-      revealedBlocks[y * play.width.value + x] = ele.revealed
+      revealedBlocks[y * play.width + x] = ele.revealed
       ele.revealed = true
     }))
   }
   else {
     play.state.value.board.forEach((row, y) => row.forEach((ele, x) => {
-      ele.revealed = revealedBlocks[y * play.width.value + x]
+      ele.revealed = revealedBlocks[y * play.width + x]
     }))
   }
 })
@@ -29,12 +43,14 @@ watch(isDevMode, (newValue) => {
 <template>
   <div class="minesweeper" flex="~ col" items-center>
     <div class="menu" flex="~" justify-center gap-2 pt-2>
-      <button
-        v-for="item, idx in GameDifficulty"
-        :key="idx" btn
-        @click="play.onChangeGameDifficulty(item)"
-      >
-        {{ item }}
+      <button btn @click="newGame('Easy')">
+        Easy
+      </button>
+      <button btn @click="newGame('Medium')">
+        Medium
+      </button>
+      <button btn @click="newGame('Hard')">
+        Hard
       </button>
       <button
         w-4em pl-2 pr-2 rd-1 cursor-pointer
