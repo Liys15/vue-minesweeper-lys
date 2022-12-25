@@ -1,8 +1,36 @@
+<script lang='ts' setup>
+import { watch } from 'vue'
+import { useStorage } from '@vueuse/core'
+import MineBlock from './MineBlock.vue'
+import { GameDifficulty, GamePlay, isDevMode, toggleDev } from '~/composables'
+
+const play = new GamePlay()
+
+useStorage('vue-minesweeper-gamestate', play.state)
+
+const revealedBlocks: boolean[] = Array.from([]) // 记录作弊前点开的block
+
+watch(isDevMode, (newValue) => {
+  if (newValue) {
+    play.state.value.board.forEach((row, y) => row.forEach((ele, x) => {
+      revealedBlocks[y * play.width.value + x] = ele.revealed
+      ele.revealed = true
+    }))
+  }
+  else {
+    play.state.value.board.forEach((row, y) => row.forEach((ele, x) => {
+      ele.revealed = revealedBlocks[y * play.width.value + x]
+    }))
+  }
+})
+</script>
+
 <template>
   <div class="minesweeper" flex="~ col" items-center>
     <div class="menu" flex="~" justify-center gap-2 pt-2>
-      <button btn 
-        v-for="item in GameDifficulty"
+      <button
+        v-for="item, idx in GameDifficulty"
+        :key="idx" btn
         @click="play.onChangeGameDifficulty(item)"
       >
         {{ item }}
@@ -11,18 +39,25 @@
         w-4em pl-2 pr-2 rd-1 cursor-pointer
         bg-purple-500 op-50
         hover:bg-fuchsia-500
-       @click="toggleDev()"
+        @click="toggleDev()"
       >
         {{ isDevMode ? 'Hide' : 'Show' }}
       </button>
     </div>
     <div class="gameboard" m-4 pt-2>
-      <div flex="~" justify-between pb-4>
-        <div screen class="time">x</div>
-        <div screen class="mines">{{ play.remainingMines }}</div>
+      <div flex="~" justify-between text-xl pb-2>
+        <div class="time" flex-inline items-center>
+          <div i-mdi-timer />
+          <span pl-2> {{ play.getTime() }} </span>
+        </div>
+        <div class="mines" flex-inline items-center>
+          <div i-mdi-bomb />
+          <span pl-2> {{ play.remainingMines }} </span>
+        </div>
       </div>
-      <div class="row" 
-        v-for="row, y in play.state.value" :key="y"
+      <div
+        v-for="row, y in play.state.value.board"
+        :key="y" class="row"
         flex="~"
       >
         <MineBlock
@@ -35,29 +70,3 @@
     </div>
   </div>
 </template>
-
-<script lang='ts' setup>
-import MineBlock from './MineBlock.vue';
-import { GamePlay, GameDifficulty } from '~/composables'
-import { isDevMode, toggleDev } from '~/composables'
-import { watch } from 'vue';
-
-const play = new GamePlay()
-
-const revealedBlocks: boolean[] = Array.from([]) //记录作弊前点开的block
-
-watch(isDevMode, (newValue) => {
-  if (newValue) {
-    play.state.value.forEach((row, y) => row.forEach((ele, x) => {
-      revealedBlocks[y * play.width.value + x] = ele.revealed
-      ele.revealed = true
-    }))
-  }
-  else {
-    play.state.value.forEach((row, y) => row.forEach((ele, x) => {
-      ele.revealed = revealedBlocks[y * play.width.value + x]
-    }))
-  }
-})
-
-</script>

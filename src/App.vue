@@ -5,7 +5,7 @@ import Minesweeper from './components/Minesweeper.vue'
 
 <template>
   <p>Minesweeper</p>
-  
+
   <Minesweeper />
 
   <Footer />
