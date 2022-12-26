@@ -5,7 +5,9 @@ import MineBlock from './MineBlock.vue'
 import Confetti from './Confetti.vue'
 import { GamePlay, isDevMode, toggleDev } from '~/composables'
 
-const play = new GamePlay('Medium')
+const defaultGame = JSON.parse(localStorage.getItem('vue-minesweeper-gamestate') || '{\"gameDifficulty\": \"Medium\"}')
+
+const play = new GamePlay(defaultGame.gameDifficulty)
 
 useStorage('vue-minesweeper-gamestate', play.state)
 

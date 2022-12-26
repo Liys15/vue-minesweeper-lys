@@ -40,13 +40,13 @@ export class GamePlay {
       startTime: timestamp.value,
       endTime: timestamp.value,
     }
+    this.reset(defaultGame)
     this.remainingMines = computed(() =>
       Math.max(0, this.totalMines - this.state.value.flags),
     )
-    this.reset()
   }
 
-  reset(state: 'Easy' | 'Medium' | 'Hard' = 'Medium') {
+  reset(state: 'Easy' | 'Medium' | 'Hard') {
     this.state.value.gameDifficulty = state
     this.setBoardConfig()
     this.state.value.gameState = 'play'
