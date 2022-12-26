@@ -30,7 +30,7 @@ export class GamePlay {
   totalMines = 0
   remainingMines
 
-  constructor(defaultGame: 'Easy' | 'Medium' | 'Hard' = 'Medium') {
+  constructor(defaultGame: 'Easy' | 'Medium' | 'Hard') {
     this.state.value = {
       gameDifficulty: defaultGame,
       gameState: 'play',
@@ -68,9 +68,9 @@ export class GamePlay {
   setBoardConfig() {
     switch (this.state.value.gameDifficulty) {
       case 'Easy':
-        this.width = 8
-        this.height = 8
-        this.totalMines = 10
+        this.width = 5
+        this.height = 5
+        this.totalMines = 5
         break
       case 'Medium':
         this.width = 16
@@ -108,6 +108,10 @@ export class GamePlay {
       if (block.mine)
         block.revealed = true
     })
+  }
+
+  showAllFlower() {
+
   }
 
   checkGameState() {
@@ -203,6 +207,8 @@ export class GamePlay {
   expandSilbings(block: BlockState) {
     if (this.state.value.gameState !== 'play')
       return
+    if (!block.adjacentMines)
+      this.expandZeroBlocks(block)
     this.getSiblings(block).forEach((b) => {
       if (!b.revealed && !b.flagged) {
         b.revealed = true
@@ -218,6 +224,8 @@ export class GamePlay {
     this.state.value.gameState = state
     if (state === 'lost')
       this.showAllMines()
+    if (state === 'won')
+      this.showAllFlower()
     this.state.value.endTime = timestamp.value
   }
 }

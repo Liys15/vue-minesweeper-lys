@@ -1,11 +1,11 @@
-<script lang='ts' setup>
+<script setup lang='ts'>
 import { watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import MineBlock from './MineBlock.vue'
 import Confetti from './Confetti.vue'
 import { GamePlay, isDevMode, toggleDev } from '~/composables'
 
-const play = new GamePlay()
+const play = new GamePlay('Medium')
 
 useStorage('vue-minesweeper-gamestate', play.state)
 
@@ -69,6 +69,7 @@ watch(isDevMode, (newValue) => {
         <MineBlock
           v-for="block, x in row" :key="x"
           :block="block"
+          :passed="play.state.value.gameState === 'won'"
           @click="play.onClick(block)"
           @dblclick="play.expandSilbings(block)"
           @contextmenu.prevent="play.onRightClick(block)"

@@ -1,7 +1,7 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { BlockState } from '~/types'
 
-defineProps<{ block: BlockState }>()
+const props = defineProps<{ passed: boolean; block: BlockState }>()
 
 const numberColorMap = [
   'text-transparent', // 0
@@ -18,10 +18,12 @@ const numberColorMap = [
 function getBlockClass(item: BlockState) {
   if (!item.revealed)
     return 'bg-gray-500 hover:bg-gray'
-  if (item.mine)
+  if (item.mine) {
+    if (props.passed)
+      return 'bg-green-500 flip'
     return 'bg-rose-400'
-  else
-    return `${numberColorMap[item.adjacentMines]} bg-white dark:bg-stone-500`
+  }
+  else { return `${numberColorMap[item.adjacentMines]} bg-white dark:bg-stone-500` }
 }
 </script>
 
@@ -39,8 +41,21 @@ function getBlockClass(item: BlockState) {
         {{ block.adjacentMines }}
       </div>
     </template>
-    <template v-else-if="block.flagged">
+    <template v-else-if="!passed && block.flagged">
       <div> 🚩 </div>
+    </template>
+    <template v-else-if="passed">
+      <div>
+        🌸
+      </div>
     </template>
   </button>
 </template>
+
+<style scope>
+.flip {
+  transition: transform 1s;
+  transform-style: preserve-3d;
+  transform: rotateY(360deg);
+}
+</style>

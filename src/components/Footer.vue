@@ -9,7 +9,7 @@ import { toggleDark } from '~/composables'
     </button>
     <a
       ref="noreferrer" icon-btn i-carbon-logo-github
-      href="https://github.com/liys15"
+      href="https://github.com/Liys15/vue-minesweeper-lys"
       target="_blank"
       title="GitHub"
     />
