@@ -16,14 +16,14 @@ const numberColorMap = [
 ]
 
 function getBlockClass(item: BlockState) {
-  if (!item.revealed)
-    return 'bg-gray-500 hover:bg-gray'
-  if (item.mine) {
+  if (!item.revealed) {
     if (props.passed)
-      return 'bg-green-500 flip'
-    return 'bg-rose-400'
+      return 'bg-green-500/60 flip'
+    return 'bg-gray-500 hover:bg-gray'
   }
-  else { return `${numberColorMap[item.adjacentMines]} bg-white dark:bg-stone-500` }
+  if (item.mine)
+    return 'bg-rose-400'
+  else return `${numberColorMap[item.adjacentMines]} bg-white dark:bg-stone-500`
 }
 </script>
 
@@ -56,6 +56,6 @@ function getBlockClass(item: BlockState) {
 .flip {
   transition: transform 1s;
   transform-style: preserve-3d;
-  transform: rotateY(360deg);
+  transform: rotateX(360deg);
 }
 </style>
