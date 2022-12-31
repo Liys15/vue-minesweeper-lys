@@ -85,6 +85,8 @@ export class GamePlay {
     if (this.state.value.gameState !== 'play')
       return
     if (!this.state.value.mineGenerated) {
+      this.state.value.flags = 0
+      this.state.value.board.flat().forEach(blcok => blcok.flagged = false)
       this.generateMines(block)
       this.state.value.mineGenerated = true
       this.state.value.startTime = timestamp.value
