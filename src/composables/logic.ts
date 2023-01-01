@@ -91,14 +91,14 @@ export class GamePlay {
       this.state.value.mineGenerated = true
       this.state.value.startTime = timestamp.value
     }
-    if (!block.revealed) {
+    if (!block.revealed && !block.flagged) {
       block.revealed = true
+      if (block.mine)
+        this.onGameOver('lost')
       this.checkGameState()
       if (!block.adjacentMines)
         this.expandZeroBlocks(block)
     }
-    if (block.mine)
-      this.onGameOver('lost')
   }
 
   showAllMines() {
@@ -210,6 +210,8 @@ export class GamePlay {
           this.onGameOver('lost')
         else
           this.checkGameState()
+        if (!b.adjacentMines)
+          this.expandZeroBlocks(b)
       }
     })
   }
